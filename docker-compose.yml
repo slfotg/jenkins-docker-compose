@@ -1,0 +1,40 @@
+version: "3"
+services:
+    jenkins:
+        image: jenkins/jenkins:lts
+        volumes:
+            - jenkins-data:/var/jenkins_home
+        ports:
+            - "8080"
+            - "50000"
+        links:
+            - nexus:nexus
+    nginx:
+        image: slfotg/jenkins-nginx:latest
+        build:
+            context: .
+            args:
+                SSL_PASSWORD : ${SSL_PASSWORD}
+                COUNTRY      : ${COUNTRY}
+                STATE        : ${STATE}
+                CITY         : ${CITY}
+                ORG          : ${ORG}
+                SUB_ORG      : ${SUB_ORG}
+                DOMAIN       : ${DOMAIN}
+        ports:
+            - "80:80"
+            - "443:443"
+        links:
+            - jenkins:jenkins
+            - nexus:nexus
+    nexus:
+        image: sonatype/nexus3
+        volumes:
+            - nexus-data:/nexus-data
+        ports:
+            - "8081:8081"
+            - "8082:8082"
+
+volumes:
+    nexus-data:
+    jenkins-data:
